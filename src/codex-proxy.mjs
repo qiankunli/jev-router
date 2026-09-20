@@ -163,6 +163,8 @@ export function jevDecisionEvents({ tier, model = codexModelOf(tier), confidence
 
 const debug = (line) => process.env.JEV_DEBUG && log(line);
 const upstreamPath = (base, path) => `${new URL(base).pathname.replace(/\/$/, "")}${path}`;
+const routingHintFor = (model, serviceTier) =>
+  serviceTier ? `model=${model};tier=${serviceTier}` : `model=${model}`;
 
 export async function startCodexProxy({
   chatgptBaseURL = CHATGPT_BASE_URL,
@@ -179,6 +181,8 @@ export async function startCodexProxy({
     req.on("end", async () => {
       let out = Buffer.concat(chunks);
       let routing;
+      let requestModel;
+      let requestServiceTier;
       if (req.method === "POST" && /\/responses(?:\?|$)/.test(req.url ?? "")) {
         try {
           const body = JSON.parse(out.toString());
@@ -235,6 +239,8 @@ export async function startCodexProxy({
             const explaining = prompt?.includes("<jev-explain>") || /^\$jev-explain\b/i.test(prompt ?? "");
             if (prompt && !explaining) writeStatus(statusId, { manual: true, at: Date.now() });
           }
+          requestModel = body.model;
+          requestServiceTier = body.service_tier;
           out = Buffer.from(JSON.stringify(body));
         } catch (err) {
           debug(`codex passthrough, could not process body: ${err.message}`);
@@ -245,6 +251,9 @@ export async function startCodexProxy({
       const target = new URL(base);
       const transport = target.protocol === "http:" ? http : https;
       const headers = { ...req.headers, host: target.host };
+      if (base === chatgptBaseURL && requestModel) {
+        headers["x-codex-routing-hint"] = routingHintFor(requestModel, requestServiceTier);
+      }
       delete headers["content-length"];
       const upstream = transport.request(
         {
