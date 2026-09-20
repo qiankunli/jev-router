@@ -45,14 +45,14 @@ export const tierOf = (model) =>
 export const availableTiers = () =>
   TIER_NAMES.filter((n) => n !== "fable" || process.env.JEV_ALLOW_FABLE === "1");
 
-export const DEFAULT_DOWNGRADE_MAX_CONTEXT_TOKENS = 20000;
+export const DEFAULT_DOWNGRADE_CUTOFF_TOKENS = 20000;
 
 // Read this on every decision because launcher-managed .env files load after this module evaluates.
-export const downgradeMaxContextTokens = () => {
-  const configured = process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS;
-  if (configured == null || configured.trim() === "") return DEFAULT_DOWNGRADE_MAX_CONTEXT_TOKENS;
+export const downgradeCutoffTokens = () => {
+  const configured = process.env.JEV_DOWNGRADE_CUTOFF_TOKENS;
+  if (configured == null || configured.trim() === "") return DEFAULT_DOWNGRADE_CUTOFF_TOKENS;
   const value = Number(configured);
-  return Number.isSafeInteger(value) && value >= 0 ? value : DEFAULT_DOWNGRADE_MAX_CONTEXT_TOKENS;
+  return Number.isSafeInteger(value) && value >= 0 ? value : DEFAULT_DOWNGRADE_CUTOFF_TOKENS;
 };
 
 export const THRESHOLDS = {

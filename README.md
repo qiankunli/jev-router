@@ -206,7 +206,7 @@ sub-agents are pinned separately. Routing is fail-open: Jev failure never blocks
 | --- | --- | --- |
 | `JEV_API_KEY` | Both | Enables routing. `TYPESAFE_API_KEY` also works. |
 | `JEV_ALLOW_FABLE` | Both | Enables the opt-in long tier. |
-| `JEV_DOWNGRADE_MAX_CONTEXT_TOKENS` | Both | Largest context that may still downgrade; defaults to `20000`. Set a larger value to permit downgrades in longer conversations. |
+| `JEV_DOWNGRADE_CUTOFF_TOKENS` | Both | Largest context that may still downgrade; defaults to `20000`. Set a larger value to permit downgrades in longer conversations. |
 | `JEV_DEBUG` | Both | Logs decisions and rewrites to `~/.jev-claude.log` in interactive sessions. |
 | `JEV_DUMP` | Both | Dumps request bodies for debugging wire-format changes. |
 | `JEV_NO_STATUSLINE` | Claude | Disables the injected Claude status line. |

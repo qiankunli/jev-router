@@ -74,8 +74,8 @@ test("allows the same downgrade early in a conversation", () => {
 });
 
 test("allows configuring the largest context that may still downgrade", () => {
-  const previous = process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS;
-  process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS = "100000";
+  const previous = process.env.JEV_DOWNGRADE_CUTOFF_TOKENS;
+  process.env.JEV_DOWNGRADE_CUTOFF_TOKENS = "100000";
   try {
     assert.equal(
       decide({ ...base, current: "opus", jev: sure("haiku"), contextTokens: 80000 }).tier,
@@ -86,22 +86,22 @@ test("allows configuring the largest context that may still downgrade", () => {
       "opus",
     );
   } finally {
-    if (previous == null) delete process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS;
-    else process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS = previous;
+    if (previous == null) delete process.env.JEV_DOWNGRADE_CUTOFF_TOKENS;
+    else process.env.JEV_DOWNGRADE_CUTOFF_TOKENS = previous;
   }
 });
 
 test("falls back to the default downgrade context threshold for invalid configuration", () => {
-  const previous = process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS;
-  process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS = "not-a-number";
+  const previous = process.env.JEV_DOWNGRADE_CUTOFF_TOKENS;
+  process.env.JEV_DOWNGRADE_CUTOFF_TOKENS = "not-a-number";
   try {
     assert.equal(
       decide({ ...base, current: "opus", jev: sure("haiku"), contextTokens: 80000 }).tier,
       "opus",
     );
   } finally {
-    if (previous == null) delete process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS;
-    else process.env.JEV_DOWNGRADE_MAX_CONTEXT_TOKENS = previous;
+    if (previous == null) delete process.env.JEV_DOWNGRADE_CUTOFF_TOKENS;
+    else process.env.JEV_DOWNGRADE_CUTOFF_TOKENS = previous;
   }
 });
 

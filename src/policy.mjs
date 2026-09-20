@@ -2,7 +2,7 @@ import {
   TIER_NAMES,
   THRESHOLDS,
   OVERRIDE_PATTERNS,
-  downgradeMaxContextTokens,
+  downgradeCutoffTokens,
   rankOf,
 } from "./config.mjs";
 
@@ -60,7 +60,7 @@ export function decide({ prompt, jev, current, available, contextTokens = 0 }) {
     if (rankOf(target) > ceiling) return settle(TIER_NAMES[ceiling], "low-confidence-capped");
   }
 
-  if (rankOf(target) < rankOf(current) && contextTokens > downgradeMaxContextTokens()) {
+  if (rankOf(target) < rankOf(current) && contextTokens > downgradeCutoffTokens()) {
     return settle(current, "downgrade-not-worth-cache-rebuild");
   }
 
