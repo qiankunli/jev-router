@@ -37,8 +37,12 @@ export function codexTierOf(model) {
 
 /** Exact GPT models in Codex's account catalog; configured ids are the cold-start fallback. */
 export function codexModels(models = new Map()) {
+  const useResponsesLite = models.get(CODEX_AUTO_MODEL)?.use_responses_lite;
   const available = [...models.values()]
     .filter((model) => model.slug !== CODEX_AUTO_MODEL && model.supported_in_api !== false)
+    // Codex has already encoded the request using the virtual model's protocol.
+    // Rewriting the model or routing hint cannot convert Lite input to standard Responses.
+    .filter((model) => useResponsesLite == null || (model.use_responses_lite ?? false) === useResponsesLite)
     .map((model) => ({
       id: model.slug,
       tier: codexTierOf(model.slug),
@@ -49,7 +53,7 @@ export function codexModels(models = new Map()) {
       ].filter(Boolean).join("; "),
     }))
     .filter((model) => model.tier);
-  return available.length
+  return models.size
     ? available
     : Object.keys(DEFAULT_MODELS).map((tier) => ({
         id: codexModelOf(tier),
@@ -195,7 +199,20 @@ export async function startCodexProxy({
               availableTiers().includes(model.tier),
             );
             const available = [...new Set(candidates.map((model) => model.tier))];
-            const currentModel = states.get(key)?.model ?? modelForTier(candidates, "opus");
+            if (!candidates.length) {
+              debug("codex routing unavailable: no enabled models match the request protocol");
+              res.writeHead(502, { "content-type": "application/json" });
+              return res.end(JSON.stringify({ error: {
+                message: "Jev Router: no enabled models match the request protocol.",
+                type: "proxy_error",
+              } }));
+            }
+            const previousModel = states.get(key)?.model;
+            const currentModel = (
+              candidates.find((model) => model.id === previousModel) ??
+              candidates.find((model) => model.tier === "opus") ??
+              candidates[0]
+            ).id;
             const current = codexTierOf(currentModel) ?? "opus";
             const prompt = codexNewTurnPrompt(body);
             const explaining = prompt?.includes("<jev-explain>") || /^\$jev-explain\b/i.test(prompt ?? "");

@@ -230,12 +230,17 @@ ids are used only until the CLI fetches its catalog.
 - Claude request fields unsupported by a routed tier, such as adaptive thinking on Haiku,
   are removed before forwarding.
 - Codex's current request format stores tool definitions inside its Responses API input.
+- Automatic Codex routing stays within the virtual model's Responses Lite capability.
+  Models using a different request format remain available for manual selection.
 - Codex's ChatGPT backend may stream SSE without a `Content-Type` header; the proxy detects
   the event stream from its first frame.
 - Codex workspace-specific enterprise origins are internal to its built-in provider and
   cannot be reproduced by a custom provider.
 
 ## Development
+
+Run `make install` from this checkout to install its locked dependencies and link the
+local CLI commands globally. Restart running `jev-codex` processes to load source changes.
 
 ```bash
 npm install
